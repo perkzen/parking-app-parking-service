@@ -2,6 +2,7 @@ package si.feri.jms.producer;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
+import si.feri.parkinglot.ParkingSpot;
 import si.feri.parkinglot.ParkingSpotRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,9 +14,12 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class ParkingProducer implements Runnable {
+
+    private final Logger log = Logger.getLogger(ParkingProducer.class.getName());
 
     @Inject
     ConnectionFactory connectionFactory;
@@ -27,7 +31,7 @@ public class ParkingProducer implements Runnable {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     void onStart(@Observes StartupEvent ev) {
-        scheduler.scheduleWithFixedDelay(this, 0L, 5L, TimeUnit.SECONDS);
+        scheduler.scheduleWithFixedDelay(this, 0L, 1L, TimeUnit.SECONDS);
     }
 
     void onStop(@Observes ShutdownEvent ev) {
@@ -37,13 +41,12 @@ public class ParkingProducer implements Runnable {
     @Override
     public void run() {
         try (JMSContext context = connectionFactory.createContext(JMSContext.AUTO_ACKNOWLEDGE)) {
-            var parkingSpot = parkingSpotRepository.getRandomParkingSpot().await().indefinitely();
+            ParkingSpot parkingSpot = parkingSpotRepository.listAllParkingSpots().await().indefinitely().get(random.nextInt(3));
 
-            var car = Integer.toString(random.nextInt(10));
-
-            parkingSpotRepository.freeOrOccupy(parkingSpot.name, car).await().indefinitely();
-
-            context.createProducer().send(context.createQueue("parking"), parkingSpot.name);
+            context.createProducer().send(context.createQueue("parking"), parkingSpot.getName());
+            log.info("sent parking spot: %s".formatted(parkingSpot.getName()));
+        } catch (Exception e) {
+            log.severe(e.getMessage());
         }
     }
 }

@@ -1,9 +1,9 @@
 package si.feri.jms.consumer;
 
-import io.quarkus.logging.Log;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 import lombok.Getter;
+import si.feri.jms.producer.ParkingProducer;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -11,17 +11,19 @@ import javax.inject.Inject;
 import javax.jms.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class ParkingConsumer implements Runnable {
+
+    private final Logger log = Logger.getLogger(ParkingProducer.class.getName());
+
 
     @Inject
     ConnectionFactory connectionFactory;
 
     @Getter
     private volatile String lastParkingSpot;
-
-
 
     private final ExecutorService scheduler = Executors.newSingleThreadExecutor();
 
@@ -41,7 +43,7 @@ public class ParkingConsumer implements Runnable {
                 Message message = consumer.receive();
                 if (message == null) return;
                 lastParkingSpot = message.getBody(String.class);
-                Log.info("last parking spot: %s".formatted(lastParkingSpot));
+                log.info("last parking spot: %s".formatted(lastParkingSpot));
             }
         } catch (JMSException e) {
             throw new RuntimeException(e);
