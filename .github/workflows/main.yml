@@ -40,12 +40,6 @@ jobs:
         env:
           ARTEMIS_USERNAME: quarkus
           ARTEMIS_PASSWORD: quarkus
-        options: >-
-            --health-cmd "curl --silent
-            --fail http://localhost:8161/health | grep -q '\"status\":\"UP\"'"
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 10
 
     steps:
       - uses: actions/checkout@v3
