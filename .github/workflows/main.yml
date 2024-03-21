@@ -1,0 +1,60 @@
+name: Build, test and deploy backend
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  QUARKUS_MONGODB_CONNECTION_STRING: mongodb://root:root@localhost:27017
+  QUARKUS_MONGODB_DATABASE: parking
+  QUARKUS_ARTEMIS_URL: tcp://localhost:61616
+  QUARKUS_ARTEMIS_USERNAME: quarkus
+  QUARKUS_ARTEMIS_PASSWORD: quarkus
+
+
+jobs:
+  build-test-package:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: mongo:4.0.4
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: root
+        options: >-
+          --health-cmd mongo
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      active-mq:
+        image: quay.io/artemiscloud/activemq-artemis-broker:1.0.25
+        ports:
+          - 61616:61616
+          - 5672:5672
+          - 8161:8161
+        env:
+          ARTEMIS_USERNAME: quarkus
+          ARTEMIS_PASSWORD: quarkus
+        options: >-
+          --health-cmd "curl --silent --fail localhost:8161" 
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and test with Maven
+        run: mvn -B package --file pom.xml
