@@ -2,12 +2,16 @@ package si.feri.parkinglot;
 
 import io.smallrye.mutiny.Uni;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Path("/park")
 public class ParkingLotResource {
@@ -19,9 +23,9 @@ public class ParkingLotResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getAll() {
+    public Uni<List<ParkingSpot>> getAll() {
         log.info("Getting all parking spots");
-        return repository.listAllParkingSpots().await().indefinitely().stream().map(ParkingSpot::getName).collect(Collectors.toList());
+        return repository.listAllParkingSpots();
     }
 
     @POST
@@ -33,9 +37,9 @@ public class ParkingLotResource {
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ParkingSpot get(@PathParam("name") String name) {
+    public Uni<ParkingSpot> get(@PathParam("name") String name) {
         log.info("Getting parking spot: %s".formatted(name));
-        return repository.getParkingSpot(name).await().indefinitely();
+        return repository.getParkingSpot(name);
     }
 
 

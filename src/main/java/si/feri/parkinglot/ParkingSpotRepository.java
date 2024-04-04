@@ -2,10 +2,8 @@ package si.feri.parkinglot;
 
 import io.quarkus.mongodb.panache.reactive.ReactivePanacheMongoRepository;
 import io.smallrye.mutiny.Uni;
-
-import java.time.LocalDateTime;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
 
 
 @ApplicationScoped
