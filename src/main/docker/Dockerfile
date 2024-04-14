@@ -1,6 +1,6 @@
 ## Stage 1 : build with maven builder image with native capabilities
 FROM quay.io/quarkus/centos-quarkus-maven:21.1.0-java11 AS build
-COPY . /tmp/my-project
+COPY . /tmp/parking-app-parking-service
 USER root
 RUN chown -R quarkus /tmp/parking-app-parking-service
 USER quarkus
