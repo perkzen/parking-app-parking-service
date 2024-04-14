@@ -51,11 +51,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Test with Maven
+      - name: Build and Test with Maven
         run: mvn -B package --file pom.xml
-
-      - name: Package Quarkus application
-        run: mvn package -DskipTests
 
       - name: Docker login
         run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
