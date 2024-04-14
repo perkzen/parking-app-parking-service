@@ -51,8 +51,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and test with Maven
+      - name: Test with Maven
         run: mvn -B package --file pom.xml
+
+      - name: Package Quarkus application
+        run: mvn clean package -DskipTests
 
       - name: Docker login
         run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
@@ -61,7 +64,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASS }}
 
       - name: Build Docker image
-        run: docker build -t perkzen/parking-app-parking-service -f src/main/docker/Dockerfile .
+        run: docker build -t perkzen/parking-app-parking-service -f src/main/docker/Dockerfile.native .
 
 
       - name: Push Docker image
